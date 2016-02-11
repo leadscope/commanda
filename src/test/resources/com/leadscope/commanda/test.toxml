@@ -1,0 +1,8 @@
+<Compounds>
+  <Compound>
+    <Ids><Id type="cas">123-45-5</Id></Ids>
+  </Compound>
+  <Compound>
+    <Ids><Id type="cas">103-90-2</Id></Ids>
+  </Compound>
+</Compounds>
