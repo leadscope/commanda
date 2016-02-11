@@ -11,4 +11,12 @@ import pl.joegreen.lambdaFromString.TypeReference;
  */
 public class LambdaUtil {
   public static final TypeReference<String> STRING_TYPE = new TypeReference<String>(){};
+
+  /**
+   * @param v value to check
+   * @return true iff v is null or only whitespace
+   */
+  public static boolean empty(String v) {
+    return v == null || v.trim().length() == 0;
+  }
 }

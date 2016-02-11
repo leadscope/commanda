@@ -65,6 +65,17 @@ public class CommandaIntegrationTest {
   }
 
   @Test
+  public void testEmpty() throws Throwable {
+    ExpectedOutput expectedOutput = new ExpectedOutput("Should have expected first column value", "foo", "4");
+
+    Commanda cmda = new Commanda(
+            "-csv", testDir + "test2.txt",
+            "-e", "in -> in.filter(r -> !empty(r.get(1))).map(r -> r.get(0))");
+    cmda.run(null, expectedOutput);
+    expectedOutput.assertAllFound();
+  }
+
+  @Test
   public void testDefault() throws Throwable {
     ExpectedOutput expectedOutput = new ExpectedOutput("Should include provided text",
             "This is some text.", "Some more words.", "");
