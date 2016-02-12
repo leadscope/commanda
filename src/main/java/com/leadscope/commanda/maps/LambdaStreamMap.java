@@ -4,7 +4,6 @@
  */
 package com.leadscope.commanda.maps;
 
-import com.leadscope.commanda.lambda.DefaultLambdaImports;
 import com.leadscope.commanda.lambda.DynamicLambdaFactory;
 import pl.joegreen.lambdaFromString.LambdaFactoryConfiguration;
 import pl.joegreen.lambdaFromString.TypeReference;
@@ -21,17 +20,6 @@ public class LambdaStreamMap implements CommandaStreamMap {
   private Function lambda;
   private TypeReference inputType;
   private TypeReference outputType;
-
-  /**
-   * A new lambda stream map that uses the DefaultLambdaImports
-   * @param lambdaString the lambda expression code
-   * @param inputType the type of elements contained in the input stream
-   * @param outputType the type of elements contained in the output stream
-   */
-  public LambdaStreamMap(String lambdaString, TypeReference inputType, TypeReference outputType) {
-    this(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports,
-            lambdaString, inputType, outputType);
-  }
 
   /**
    * @param imports the default list of class imports to use while compiling the lambda

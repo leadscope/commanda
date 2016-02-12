@@ -4,11 +4,11 @@
  */
 package com.leadscope.commanda;
 
+import com.leadscope.commanda.lambda.DefaultLambdaImports;
 import com.leadscope.commanda.lambda.LambdaUtil;
 import com.leadscope.commanda.maps.*;
 import com.leadscope.commanda.sources.CommandaSource;
 import com.leadscope.commanda.sources.CommandaSources;
-import com.leadscope.commanda.sources.LineSource;
 import com.leadscope.commanda.util.CloseableStream;
 import pl.joegreen.lambdaFromString.TypeReference;
 
@@ -26,12 +26,29 @@ public class Commanda {
   private CommandaSource source;
   private List<File> files = new ArrayList<>();
   private List<CommandaMap> streamMaps = new ArrayList<>();
+  private List<? extends Class> imports;
+  private List<String> staticImports;
 
   /**
    * Sets up the commanda chain - see usage
    * @param args the arguments as passed in from the command-line
    */
   public Commanda(String... args) {
+    this(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports, args);
+  }
+
+  /**
+   * Sets up the commanda chain - see usage
+   * @param imports the default list of class imports to use while compiling the lambda
+   * @parma staticImports the default list of static imports to use while compiling the lambda
+   * @param args the arguments as passed in from the command-line
+   */
+  public Commanda(List<? extends Class> imports,
+                  List<String> staticImports,
+                  String... args) {
+    this.imports = imports;
+    this.staticImports = staticImports;
+
     LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
 
     for (Iterator<String> argIter = argsList.iterator(); argIter.hasNext(); ) {
@@ -167,7 +184,7 @@ public class Commanda {
     }
   }
 
-  private static CommandaMap popNextMap(TypeReference inputType, LinkedList<String> argList) {
+  private CommandaMap popNextMap(TypeReference inputType, LinkedList<String> argList) {
     String mapArg = argList.pop();
     if ("-e".equals(mapArg) || "-ne".equals(mapArg)) {
       if (argList.isEmpty()) {
@@ -178,11 +195,11 @@ public class Commanda {
         throw new RuntimeException("Missing lambda code argument to: " + mapArg);
       }
       if ("-e".equals(mapArg)) {
-        LambdaStreamMap map = new LambdaStreamMap(codeArg, inputType, nextInputType(argList));
+        LambdaStreamMap map = new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
         return map;
       }
       else {
-        LambdaElementMap map = new LambdaElementMap(codeArg, inputType, nextInputType(argList));
+        LambdaElementMap map = new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
         return map;
       }
     }

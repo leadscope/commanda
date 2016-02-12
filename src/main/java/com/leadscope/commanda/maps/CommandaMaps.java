@@ -4,6 +4,7 @@
  */
 package com.leadscope.commanda.maps;
 
+import com.leadscope.commanda.lambda.DefaultLambdaImports;
 import org.apache.commons.csv.CSVFormat;
 
 import java.util.Arrays;
@@ -20,8 +21,10 @@ import static com.leadscope.commanda.lambda.LambdaUtil.STRING_TYPE;
 public class CommandaMaps {
   public final static List<CommandaMap<?, ?>> maps =
           Arrays.asList(
-                  new LambdaElementMap("s->s", STRING_TYPE, STRING_TYPE),
-                  new LambdaStreamMap("in->in", STRING_TYPE, STRING_TYPE),
+                  new LambdaElementMap(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports,
+                          "s->s", STRING_TYPE, STRING_TYPE),
+                  new LambdaStreamMap(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports,
+                          "in->in", STRING_TYPE, STRING_TYPE),
                   new CSVLineMap("csvlines", "Maps lists of strings into CSV lines",
                           CSVFormat.DEFAULT),
                   new CSVLineMap("tablines", "Maps lists of strings into tab-delimited lines",
