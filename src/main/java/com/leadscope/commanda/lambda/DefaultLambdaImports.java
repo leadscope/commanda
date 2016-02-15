@@ -4,6 +4,7 @@
  */
 package com.leadscope.commanda.lambda;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,4 +26,26 @@ public class DefaultLambdaImports {
                   Arrays.class,
                   Collections.class
           );
+
+  /**
+   * Creates a new list of imports starting with the defaults and then adding additional ones
+   * @param additionalImports the import classes to add
+   * @return a new list of imports
+   */
+  public static List<Class<?>> addImports(Class<?>... additionalImports) {
+    List<Class<?>> newImports = new ArrayList<>(imports);
+    newImports.addAll(Arrays.asList(additionalImports));
+    return newImports;
+  }
+
+  /**
+   * Creates a new list of static imports starting with the defaults and then adding additional ones
+   * @param additionalImports the static imports to add
+   * @return a new list of static imports
+   */
+  public static List<String> addStaticImports(String... additionalImports) {
+    List<String> newImports = new ArrayList<>(staticImports);
+    newImports.addAll(Arrays.asList(additionalImports));
+    return newImports;
+  }
 }

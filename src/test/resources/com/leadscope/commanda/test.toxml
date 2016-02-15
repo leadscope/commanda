@@ -1,8 +1,12 @@
-<Compounds>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Compounds>
   <Compound>
-    <Ids><Id type="cas">123-45-5</Id></Ids>
+    <Ids>
+      <Id type="cas">123-45-5</Id>
+    </Ids>
   </Compound>
   <Compound>
-    <Ids><Id type="cas">103-90-2</Id></Ids>
+    <Ids>
+      <Id type="cas">103-90-2</Id>
+    </Ids>
   </Compound>
 </Compounds>

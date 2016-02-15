@@ -7,6 +7,8 @@ package com.leadscope.commanda;
 import com.leadscope.commanda.lambda.DefaultLambdaImports;
 import com.leadscope.commanda.lambda.LambdaUtil;
 import com.leadscope.commanda.maps.*;
+import com.leadscope.commanda.sinks.CommandaSink;
+import com.leadscope.commanda.sinks.CommandaSinks;
 import com.leadscope.commanda.sources.CommandaSource;
 import com.leadscope.commanda.sources.CommandaSources;
 import com.leadscope.commanda.util.CloseableStream;
@@ -14,6 +16,7 @@ import pl.joegreen.lambdaFromString.TypeReference;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -24,6 +27,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public class Commanda {
   private CommandaSource source;
+  private CommandaSink sink;
   private List<File> files = new ArrayList<>();
   private List<CommandaMap> streamMaps = new ArrayList<>();
   private List<? extends Class> imports;
@@ -75,6 +79,16 @@ public class Commanda {
       source = CommandaSources.defaultSource;
     }
 
+    for (Iterator<String> argIter = argsList.iterator(); argIter.hasNext(); ) {
+      String nextArg = argIter.next();
+      Optional<CommandaSink<?>> argSink = CommandaSinks.forArg(nextArg);
+      if (argSink.isPresent()) {
+        sink = argSink.get();
+        argIter.remove();
+        break;
+      }
+    }
+
     TypeReference inputType = source.getElementType();
     while (!argsList.isEmpty()) {
       CommandaMap nextMap = popNextMap(inputType, argsList);
@@ -84,11 +98,22 @@ public class Commanda {
   }
 
   /**
-   * Processes the input stream passing the mapped output strings to the provided handler
+   * Processes the stream using stdout if a sink is provided
    * @param stdin the standard input to use if no files are provided - this will NOT be closed
-   * @param handler optional handler for processing the output
+   * @param handler optional handler for processing the output - only used if no sink is provided
    */
   public void run(InputStream stdin, Consumer<String> handler) {
+    run(stdin, handler, System.out);
+  }
+
+  /**
+   * Processes the input stream passing mapped output strings to the provided handler if no sink
+   * is provided
+   * @param stdin the standard input to use if no files are provided - this will NOT be closed
+   * @param handler optional handler for processing the output - only used if no sink is provided
+   * @param stdout optional output stream for the sink to write to - only used if sink is provided
+   */
+  public void run(InputStream stdin, Consumer<String> handler, OutputStream stdout) {
     CloseableStream closeableStream = null;
     try {
       Stream stream;
@@ -115,11 +140,19 @@ public class Commanda {
         }
       }
 
-      if (handler != null) {
-        stream.forEachOrdered(handler);
+      if (sink != null) {
+        if (stdout == null) {
+          throw new RuntimeException("No stdout was provided a sink was specified for output");
+        }
+        sink.consume(stream, stdout);
       }
       else {
-        stream.forEachOrdered(l->{});
+        if (handler != null) {
+          stream.forEachOrdered(handler);
+        }
+        else {
+          stream.forEachOrdered(l -> {});
+        }
       }
     }
     finally {
@@ -147,6 +180,13 @@ public class Commanda {
             a.getDescription();
   }
 
+  private static String argUsage(CommandaSink<?> a) {
+    return "    -" +
+            a.getArgName() +
+            pad(CommandaSinks.maxArgLength() - a.getArgName().length() + 2) +
+            a.getDescription();
+  }
+
   private static void usageExit() {
     System.err.println();
     System.err.println("Usage: cmda [source-operand] [file...] [map-operands...]");
@@ -160,12 +200,22 @@ public class Commanda {
     CommandaMaps.maps.stream()
             .map(Commanda::argUsage)
             .forEachOrdered(System.err::println);
+    System.err.println();
+    System.err.println("  sink-operands:");
+    CommandaSinks.sinks.stream()
+            .map(Commanda::argUsage)
+            .forEachOrdered(System.err::println);
     System.exit(1);
   }
 
-  private static TypeReference nextInputType(LinkedList<String> argList) {
+  private TypeReference nextInputType(LinkedList<String> argList) {
     if (argList.isEmpty()) {
-      return LambdaUtil.STRING_TYPE;
+      if (sink == null) {
+        return LambdaUtil.STRING_TYPE;
+      }
+      else {
+        return sink.getInputType();
+      }
     }
     else {
       String mapArg = argList.getFirst();
@@ -195,12 +245,10 @@ public class Commanda {
         throw new RuntimeException("Missing lambda code argument to: " + mapArg);
       }
       if ("-e".equals(mapArg)) {
-        LambdaStreamMap map = new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
-        return map;
+        return new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
       }
       else {
-        LambdaElementMap map = new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
-        return map;
+        return new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
       }
     }
     else {
@@ -220,7 +268,7 @@ public class Commanda {
   public static void main(String[] args) {
     try {
       Commanda commanda = new Commanda(args);
-      commanda.run(System.in, System.out::println);
+      commanda.run(System.in, System.out::println, System.out);
     }
     catch (Throwable t) {
       t.printStackTrace();

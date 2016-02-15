@@ -8,8 +8,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * Tests various commanda usages from the command-line
@@ -24,7 +27,7 @@ public class CommandaIntegrationTest {
     Commanda cmda = new Commanda(
             "-tox", testDir + "test.toxml",
             "-ne", "cr -> cr.getIds().get(0).getValue()");
-    cmda.run(null, expectedOutput);
+    cmda.run(null, expectedOutput, System.out);
     expectedOutput.assertAllFound();
   }
 
@@ -126,5 +129,22 @@ public class CommandaIntegrationTest {
             "-ne", "r -> r.get(0)");
     cmda.run(null, expectedOutput);
     expectedOutput.assertAllFound();
+  }
+
+  @Test
+  public void testToxmlSink() throws Throwable {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    Commanda cmda = new Commanda(
+            "-tox", testDir + "test.toxml",
+            "-ne", "cr -> cr",
+            "-toxOut");
+    cmda.run(null, null, baos);
+
+    byte[] inputBytes = Files.readAllBytes(new File(testDir+"test.toxml").toPath());
+    String inputString = new String(inputBytes, StandardCharsets.UTF_8).trim();
+    byte[] outputBytes = baos.toByteArray();
+    String outputString = new String(outputBytes, StandardCharsets.UTF_8).trim();
+    Assert.assertEquals("Output file should match input file", inputString, outputString);
   }
 }
