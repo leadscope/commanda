@@ -134,6 +134,18 @@ public class CommandaIntegrationTest {
   }
 
   @Test
+  public void testMultipleLinesFiles() throws Throwable {
+    ExpectedOutput expectedOutput = new ExpectedOutput("Should have expected the entire lines",
+            "id,name,value", "1,foo,\"baz waz\"", "2,baz,foo", "3,\"foo baz\",baz",
+            "foo,baz,bar", "1,2,3", "4,5,6");
+
+    Commanda cmda = new Commanda(
+            "-utf8", testDir + "test-csv.txt", testDir + "test3.txt");
+    cmda.run(null, expectedOutput);
+    expectedOutput.assertAllFound();
+  }
+
+  @Test
   public void testToxmlSink() throws Throwable {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
