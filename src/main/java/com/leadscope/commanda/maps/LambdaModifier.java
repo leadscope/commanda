@@ -11,6 +11,9 @@ import pl.joegreen.lambdaFromString.TypeReference;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * A lambda expression that modifies stream elements in memory
+ */
 @SuppressWarnings("unchecked")
 public class LambdaModifier extends CommandaModifier {
   private Consumer lambda;

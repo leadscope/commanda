@@ -9,6 +9,11 @@ import pl.joegreen.lambdaFromString.TypeReference;
 import java.io.OutputStream;
 import java.util.stream.Stream;
 
+/**
+ * A sink at the end of a commanda chain that writes the results
+ * to a provided OutputStream
+ * @param <T>
+ */
 public interface CommandaSink<T> {
   /**
    * @return a reference to the input type

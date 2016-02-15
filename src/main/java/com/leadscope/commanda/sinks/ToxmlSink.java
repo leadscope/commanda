@@ -11,6 +11,9 @@ import pl.joegreen.lambdaFromString.TypeReference;
 import java.io.OutputStream;
 import java.util.stream.Stream;
 
+/**
+ * A commanda sink that writes a stream of CompoundRecord elements to a ToxML document
+ */
 public class ToxmlSink implements CommandaSink<CompoundRecord> {
   @Override
   public TypeReference<CompoundRecord> getInputType() {

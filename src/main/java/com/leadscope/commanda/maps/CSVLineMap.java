@@ -12,6 +12,9 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Maps lists of strings into CSV record strings based on the given format
+ */
 public class CSVLineMap implements CommandaElementMap<List<String>, String>, Function<List<String>, String> {
   private String argName;
   private String description;
