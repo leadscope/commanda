@@ -189,7 +189,7 @@ public class Commanda {
 
   private static void usageExit() {
     System.err.println();
-    System.err.println("Usage: cmda [source-operand] [file...] [map-operands...]");
+    System.err.println("Usage: cmda [source-operand] [file...] [map-operands...] [sink-operand]");
     System.err.println();
     System.err.println("  source-operands:");
     CommandaSources.sources.stream()
@@ -266,6 +266,9 @@ public class Commanda {
    * @param args the arguments as passed in from the command-line
    */
   public static void main(String[] args) {
+    if (Arrays.asList(args).contains("--help")) {
+      usageExit();
+    }
     try {
       Commanda commanda = new Commanda(args);
       commanda.run(System.in, System.out::println, System.out);
