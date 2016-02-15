@@ -116,4 +116,15 @@ public class CommandaIntegrationTest {
     cmda.run(input, expectedOutput);
     expectedOutput.assertAllFound();
   }
+
+  @Test
+  public void testMultipleCsvFiles() throws Throwable {
+    ExpectedOutput expectedOutput = new ExpectedOutput("Should have expected first column value", "id", "1", "2", "3", "foo", "1", "4");
+
+    Commanda cmda = new Commanda(
+            "-csv", testDir + "test-csv.txt", testDir + "test3.txt",
+            "-ne", "r -> r.get(0)");
+    cmda.run(null, expectedOutput);
+    expectedOutput.assertAllFound();
+  }
 }
