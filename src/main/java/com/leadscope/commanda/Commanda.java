@@ -236,7 +236,7 @@ public class Commanda {
 
   private CommandaMap popNextMap(TypeReference inputType, LinkedList<String> argList) {
     String mapArg = argList.pop();
-    if ("-e".equals(mapArg) || "-ne".equals(mapArg)) {
+    if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
       if (argList.isEmpty()) {
         throw new RuntimeException("Missing lambda code argument to: " + mapArg);
       }
@@ -247,8 +247,11 @@ public class Commanda {
       if ("-e".equals(mapArg)) {
         return new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
       }
-      else {
+      else if ("-ne".equals(mapArg)) {
         return new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
+      }
+      else {
+        return new LambdaModifier(imports, staticImports, codeArg, inputType);
       }
     }
     else {

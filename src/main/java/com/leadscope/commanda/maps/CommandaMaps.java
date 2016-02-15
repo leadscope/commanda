@@ -25,6 +25,8 @@ public class CommandaMaps {
                           "s->s", STRING_TYPE, STRING_TYPE),
                   new LambdaStreamMap(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports,
                           "in->in", STRING_TYPE, STRING_TYPE),
+                  new LambdaModifier(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports,
+                          "s->{}", STRING_TYPE),
                   new CSVLineMap("csvlines", "Maps lists of strings into CSV lines",
                           CSVFormat.DEFAULT),
                   new CSVLineMap("tablines", "Maps lists of strings into tab-delimited lines",

@@ -4,6 +4,8 @@
  */
 package com.leadscope.commanda;
 
+import com.leadscope.commanda.lambda.DefaultLambdaImports;
+import com.leadscope.stucco.TypedValue;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -146,5 +148,22 @@ public class CommandaIntegrationTest {
     byte[] outputBytes = baos.toByteArray();
     String outputString = new String(outputBytes, StandardCharsets.UTF_8).trim();
     Assert.assertEquals("Output file should match input file", inputString, outputString);
+  }
+
+  @Test
+  public void testToxmlModifier() throws Throwable {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    Commanda cmda = new Commanda(
+            DefaultLambdaImports.addImports(TypedValue.class),
+            DefaultLambdaImports.staticImports,
+            "-tox", testDir + "test.toxml",
+            "-me", "cr -> { TypedValue id = cr.getIds().addNew(); id.setType(\"reg\"); id.setValue(\"12345\"); }",
+            "-toxOut");
+    cmda.run(null, null, baos);
+
+    byte[] outputBytes = baos.toByteArray();
+    String outputString = new String(outputBytes, StandardCharsets.UTF_8).trim();
+    Assert.assertTrue("Should have new id in output", outputString.contains("<Id type=\"reg\">12345</Id>"));
   }
 }
