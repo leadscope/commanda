@@ -166,4 +166,45 @@ public class CommandaIntegrationTest {
     String outputString = new String(outputBytes, StandardCharsets.UTF_8).trim();
     Assert.assertTrue("Should have new id in output", outputString.contains("<Id type=\"reg\">12345</Id>"));
   }
+
+  @Test
+  public void testSinkTypeCheck() throws Throwable {
+    try {
+      new Commanda(
+              "-csv", testDir + "test3.txt",
+              "-toxOut");
+      Assert.fail("Should have thrown exception with mismatched type");
+    }
+    catch (RuntimeException re) {
+      Assert.assertTrue("Should have mentioned type issue in error message", re.getMessage().contains("does not match output type"));
+    }
+  }
+
+  @Test
+  public void testMapTypeCheck() throws Throwable {
+    try {
+      new Commanda(
+              "-tox", testDir + "test.toxml",
+              "-csvlines",
+              "-toxOut");
+      Assert.fail("Should have thrown exception with mismatched type");
+    }
+    catch (RuntimeException re) {
+      Assert.assertTrue("Should have mentioned type issue in error message", re.getMessage().contains("does not match output type"));
+    }
+  }
+
+  @Test
+  public void testLambdaTypeCheck() throws Throwable {
+    try {
+      new Commanda(
+              "-csv", testDir + "test3.txt",
+              "-ne", "r -> r",
+              "-toxOut");
+      Assert.fail("Should have thrown exception with mismatched type");
+    }
+    catch (RuntimeException re) {
+      Assert.assertTrue("Should have mentioned type issue in error message", re.getMessage().contains("Type mismatch: cannot convert"));
+    }
+  }
 }

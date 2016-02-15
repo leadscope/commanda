@@ -95,6 +95,11 @@ public class Commanda {
       streamMaps.add(nextMap);
       inputType = nextMap.getOutputType();
     }
+
+    if (sink != null && !sink.getInputType().toString().equals(inputType.toString())) {
+      throw new RuntimeException("Input for sink: -" + sink.getArgName() +
+              " does not match output type for last argument: " + inputType.toString());
+    }
   }
 
   /**
@@ -219,8 +224,8 @@ public class Commanda {
     }
     else {
       String mapArg = argList.getFirst();
-      if ("-e".equals(mapArg) || "-ne".equals(mapArg)) {
-        throw new RuntimeException("Cannot have more than one adjacent lambda expression (-e or -ne)");
+      if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
+        throw new RuntimeException("Cannot have more than one adjacent lambda expression (-e, -ne, or -me)");
       }
       else {
         Optional<CommandaMap<?, ?>> map = CommandaMaps.forArg(mapArg);
@@ -257,6 +262,10 @@ public class Commanda {
     else {
       Optional<CommandaMap<?, ?>> map = CommandaMaps.forArg(mapArg);
       if (map.isPresent()) {
+        if (!map.get().getInputType().toString().equals(inputType.toString())) {
+          throw new RuntimeException("Input for argument: " + mapArg +
+                  " does not match output type for previous argument: " + inputType.toString());
+        }
         return map.get();
       }
       else {
