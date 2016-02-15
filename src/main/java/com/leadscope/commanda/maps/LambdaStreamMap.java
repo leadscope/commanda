@@ -43,7 +43,7 @@ public class LambdaStreamMap implements CommandaStreamMap {
 
       DynamicLambdaFactory factory = DynamicLambdaFactory.get(config);
 
-      lambda = factory.createLambda(lambdaString, getTypeString());
+      lambda = (Function)factory.createLambda(lambdaString, getTypeString());
     }
     catch (RuntimeException re) {
       throw re;

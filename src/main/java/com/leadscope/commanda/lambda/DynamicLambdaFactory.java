@@ -68,15 +68,12 @@ public class DynamicLambdaFactory {
    * @throws LambdaCreationException when anything goes wrong (no other exceptions are thrown including runtimes),
    *                                 if the exception was caused by compilation failure it will contain a CompilationDetails instance describing them
    */
-  public <T> T createLambda(String code, String typeString) throws LambdaCreationException {
+  public Object createLambda(String code, String typeString) throws LambdaCreationException {
     String helperClassSource = helperProvider.getHelperClassSource(typeString, code, imports, staticImports);
     try {
       Class<?> helperClass = classFactory.createClass(helperProvider.getHelperClassName(), helperClassSource, javaCompiler);
       Method lambdaReturningMethod = helperClass.getMethod(helperProvider.getLambdaReturningMethodName());
-      @SuppressWarnings("unchecked")
-      // the whole point of the class template and runtime compilation is to make this cast work well :-)
-              T lambda = (T) lambdaReturningMethod.invoke(null);
-      return lambda;
+      return lambdaReturningMethod.invoke(null);
     } catch (ReflectiveOperationException | RuntimeException e) {
       throw new LambdaCreationException(e);
     } catch (ClassCompilationException classCompilationException) {
@@ -91,7 +88,7 @@ public class DynamicLambdaFactory {
    *
    * @see #createLambda(String, String)
    */
-  public <T> T createLambdaUnchecked(String code, String typeString) {
+  public Object createLambdaUnchecked(String code, String typeString) {
     try {
       return createLambda(code, typeString);
     } catch (LambdaCreationException e) {
