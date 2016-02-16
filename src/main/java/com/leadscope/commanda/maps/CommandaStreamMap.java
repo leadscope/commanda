@@ -18,5 +18,5 @@ public interface CommandaStreamMap<T, R> extends CommandaMap<T, R> {
    * Gets the function that will map the elements
    * @return the mapping function
    */
-  Function<Stream<R>, Stream<T>> getFunction();
+  Function<Stream<T>, Stream<R>> getFunction();
 }
