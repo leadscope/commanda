@@ -11,6 +11,10 @@ import com.leadscope.commanda.sources.CommandaSource;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * Defines the arguments that will be available to an execution of the commanda
+ * application
+ */
 public class CommandaArgs {
   private CommandaSource<?> defaultSource;
   private ArgList<CommandaSource<?>> sources;
@@ -44,6 +48,10 @@ public class CommandaArgs {
     return sinks;
   }
 
+  /**
+   * Looks for duplicates among the arguments and throws a RuntimeException if a duplicate
+   * is found
+   */
   public void checkForDuplicates() {
     Set<String> argNames = new HashSet<>();
     Arrays.asList(sources, maps, sinks).stream()
@@ -58,6 +66,10 @@ public class CommandaArgs {
             });
   }
 
+  /**
+   * A utility wrapper for a list of arguments
+   * @param <T> the type of argument
+   */
   public static class ArgList<T extends CommandaArg> {
     private List<T> args;
     public ArgList(List<T> args) {
@@ -68,12 +80,21 @@ public class CommandaArgs {
       return args.stream();
     }
 
+    /**
+     * Gets the longest argument name in the collection (not including the -)
+     * @return the max argument name
+     */
     public int maxArgLength() {
       return args.stream()
               .mapToInt(s -> s.getArgName().length())
               .max().getAsInt();
     }
 
+    /**
+     * Gets the argument matching the command line argument (including the -)
+     * @param arg the argument from the command line (must include the -)
+     * @return a matching argument object if present
+     */
     public Optional<T> forArg(String arg) {
       return args.stream()
               .filter(a -> arg.equals("-" + a.getArgName()))

@@ -4,6 +4,9 @@
  */
 package com.leadscope.commanda;
 
+/**
+ * An argument passed to the commanda application
+ */
 public interface CommandaArg {
   /**
    * Gets the name used on the command line, not including the hyphen. E.g. returning

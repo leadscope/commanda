@@ -20,6 +20,9 @@ import java.util.Arrays;
 
 import static com.leadscope.commanda.lambda.LambdaUtil.STRING_TYPE;
 
+/**
+ * The default commanda args used by the Commanda main command-line application
+ */
 public class DefaultCommandaArgs {
   public final static LineSource defaultSource =
           new LineSource("utf8", "Text encoded in UTF-8", Charset.forName("UTF-8"));
