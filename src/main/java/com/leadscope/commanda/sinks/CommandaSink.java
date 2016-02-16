@@ -4,6 +4,7 @@
  */
 package com.leadscope.commanda.sinks;
 
+import com.leadscope.commanda.CommandaArg;
 import pl.joegreen.lambdaFromString.TypeReference;
 
 import java.io.OutputStream;
@@ -14,24 +15,11 @@ import java.util.stream.Stream;
  * to a provided OutputStream
  * @param <T>
  */
-public interface CommandaSink<T> {
+public interface CommandaSink<T> extends CommandaArg {
   /**
    * @return a reference to the input type
    */
   TypeReference<T> getInputType();
 
   void consume(Stream<T> input, OutputStream output);
-
-  /**
-   * Gets the name used on the command line, not including the hyphen. E.g. returning
-   * "toxOut" would be used on the command line as -toxOut
-   * @return the arg name
-   */
-  String getArgName();
-
-  /**
-   * Gets a brief description displayed in the usage message
-   * @return a brief description
-   */
-  String getDescription();
 }

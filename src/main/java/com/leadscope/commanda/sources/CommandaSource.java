@@ -4,6 +4,7 @@
  */
 package com.leadscope.commanda.sources;
 
+import com.leadscope.commanda.CommandaArg;
 import com.leadscope.commanda.util.CloseableStream;
 import pl.joegreen.lambdaFromString.TypeReference;
 
@@ -16,20 +17,7 @@ import java.util.stream.Stream;
  * Provides a stream of type T from either a list of files or input stream
  * @param <T> the type of output stream
  */
-public interface CommandaSource<T> {
-  /**
-   * Gets the name used on the command line, not including the hyphen. E.g. returning
-   * "csv" would be used on the command line as -csv
-   * @return the arg name
-   */
-  String getArgName();
-
-  /**
-   * Gets a brief description displayed in the usage message
-   * @return a brief description
-   */
-  String getDescription();
-
+public interface CommandaSource<T> extends CommandaArg {
   /**
    * Creates a stream that will read from the given input stream
    * @param is the input stream

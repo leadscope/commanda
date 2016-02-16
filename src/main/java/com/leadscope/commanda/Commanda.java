@@ -8,9 +8,7 @@ import com.leadscope.commanda.lambda.DefaultLambdaImports;
 import com.leadscope.commanda.lambda.LambdaUtil;
 import com.leadscope.commanda.maps.*;
 import com.leadscope.commanda.sinks.CommandaSink;
-import com.leadscope.commanda.sinks.CommandaSinks;
 import com.leadscope.commanda.sources.CommandaSource;
-import com.leadscope.commanda.sources.CommandaSources;
 import com.leadscope.commanda.util.CloseableStream;
 import pl.joegreen.lambdaFromString.TypeReference;
 
@@ -38,7 +36,7 @@ public class Commanda {
    * @param args the arguments as passed in from the command-line
    */
   public Commanda(String... args) {
-    this(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports, args);
+    this(DefaultLambdaImports.imports, DefaultLambdaImports.staticImports, DefaultCommandaArgs.defaultArgs(), args);
   }
 
   /**
@@ -50,14 +48,30 @@ public class Commanda {
   public Commanda(List<? extends Class> imports,
                   List<String> staticImports,
                   String... args) {
+    this(imports, staticImports, DefaultCommandaArgs.defaultArgs(), args);
+  }
+
+  /**
+   * Sets up the commanda chain - see usage
+   * @param imports the default list of class imports to use while compiling the lambda
+   * @parma staticImports the default list of static imports to use while compiling the lambda
+   * @param availableArgs the available arguments for this
+   * @param args the arguments as passed in from the command-line
+   */
+  public Commanda(List<? extends Class> imports,
+                  List<String> staticImports,
+                  CommandaArgs availableArgs,
+                  String... args) {
     this.imports = imports;
     this.staticImports = staticImports;
+
+    availableArgs.checkForDuplicates();
 
     LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
 
     for (Iterator<String> argIter = argsList.iterator(); argIter.hasNext(); ) {
       String nextArg = argIter.next();
-      Optional<CommandaSource<?>> argSource = CommandaSources.forArg(nextArg);
+      Optional<CommandaSource<?>> argSource = availableArgs.getSources().forArg(nextArg);
       if (argSource.isPresent()) {
         source = argSource.get();
         argIter.remove();
@@ -76,22 +90,33 @@ public class Commanda {
     }
 
     if (source == null) {
-      source = CommandaSources.defaultSource;
+      source = availableArgs.getDefaultSource();
+    }
+    else {
+      argsList.stream()
+              .filter(arg -> availableArgs.getSources().forArg(arg).isPresent())
+              .forEach(arg -> {
+                throw new RuntimeException("More than one source defined: -" + source.getArgName() +
+                        " and " + arg);
+              });
     }
 
     for (Iterator<String> argIter = argsList.iterator(); argIter.hasNext(); ) {
       String nextArg = argIter.next();
-      Optional<CommandaSink<?>> argSink = CommandaSinks.forArg(nextArg);
+      Optional<CommandaSink<?>> argSink = availableArgs.getSinks().forArg(nextArg);
       if (argSink.isPresent()) {
+        if (sink != null) {
+          throw new RuntimeException("More than one sink argument provided: -" + sink.getArgName() +
+                  " and " + argSink);
+        }
         sink = argSink.get();
         argIter.remove();
-        break;
       }
     }
 
     TypeReference inputType = source.getElementType();
     while (!argsList.isEmpty()) {
-      CommandaMap nextMap = popNextMap(inputType, argsList);
+      CommandaMap nextMap = popNextMap(availableArgs, inputType, argsList);
       streamMaps.add(nextMap);
       inputType = nextMap.getOutputType();
     }
@@ -99,6 +124,67 @@ public class Commanda {
     if (sink != null && !sink.getInputType().toString().equals(inputType.toString())) {
       throw new RuntimeException("Input for sink: -" + sink.getArgName() +
               " does not match output type for last argument: " + inputType.toString());
+    }
+  }
+
+  private TypeReference nextInputType(CommandaArgs availableArgs, LinkedList<String> argList) {
+    if (argList.isEmpty()) {
+      if (sink == null) {
+        return LambdaUtil.STRING_TYPE;
+      }
+      else {
+        return sink.getInputType();
+      }
+    }
+    else {
+      String mapArg = argList.getFirst();
+      if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
+        throw new RuntimeException("Cannot have more than one adjacent lambda expression (-e, -ne, or -me)");
+      }
+      else {
+        Optional<CommandaMap<?, ?>> map = availableArgs.getMaps().forArg(mapArg);
+        if (map.isPresent()) {
+          return map.get().getInputType();
+        }
+        else {
+          throw new RuntimeException("Unknown map argument: " + mapArg);
+        }
+      }
+    }
+  }
+
+  private CommandaMap popNextMap(CommandaArgs availableArgs, TypeReference inputType, LinkedList<String> argList) {
+    String mapArg = argList.pop();
+    if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
+      if (argList.isEmpty()) {
+        throw new RuntimeException("Missing lambda code argument to: " + mapArg);
+      }
+      String codeArg = argList.pop();
+      if (codeArg.startsWith("-")) {
+        throw new RuntimeException("Missing lambda code argument to: " + mapArg);
+      }
+      if ("-e".equals(mapArg)) {
+        return new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(availableArgs, argList));
+      }
+      else if ("-ne".equals(mapArg)) {
+        return new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(availableArgs, argList));
+      }
+      else {
+        return new LambdaModifier(imports, staticImports, codeArg, inputType);
+      }
+    }
+    else {
+      Optional<CommandaMap<?, ?>> map = availableArgs.getMaps().forArg(mapArg);
+      if (map.isPresent()) {
+        if (!map.get().getInputType().toString().equals(inputType.toString())) {
+          throw new RuntimeException("Input for argument: " + mapArg +
+                  " does not match output type for previous argument: " + inputType.toString());
+        }
+        return map.get();
+      }
+      else {
+        throw new RuntimeException("Unknown map argument: " + mapArg);
+      }
     }
   }
 
@@ -171,123 +257,53 @@ public class Commanda {
     return new String(new char[length]).replace('\0', ' ');
   }
 
-  private static String argUsage(CommandaSource<?> a) {
+  private static String argUsage(int maxArgLength, CommandaArg a) {
     return "    -" +
             a.getArgName() +
-            pad(CommandaSources.maxArgLength() - a.getArgName().length() + 2) +
+            pad(maxArgLength - a.getArgName().length() + 2) +
             a.getDescription();
   }
 
-  private static String argUsage(CommandaMap<?, ?> a) {
-    return "    -" +
-            a.getArgName() +
-            pad(CommandaMaps.maxArgLength() - a.getArgName().length() + 2) +
-            a.getDescription();
-  }
-
-  private static String argUsage(CommandaSink<?> a) {
-    return "    -" +
-            a.getArgName() +
-            pad(CommandaSinks.maxArgLength() - a.getArgName().length() + 2) +
-            a.getDescription();
-  }
-
-  private static void usageExit() {
+  private static void usageExit(CommandaArgs args) {
     System.err.println();
     System.err.println("Usage: cmda [source-operand] [file...] [map-operands...] [sink-operand]");
     System.err.println();
     System.err.println("  source-operands:");
-    CommandaSources.sources.stream()
-            .map(Commanda::argUsage)
+    args.getSources().stream()
+            .map(a -> argUsage(args.getSources().maxArgLength(), a))
             .forEachOrdered(System.err::println);
     System.err.println();
     System.err.println("  map-operands:");
-    CommandaMaps.maps.stream()
-            .map(Commanda::argUsage)
+    args.getMaps().stream()
+            .map(a -> argUsage(args.getMaps().maxArgLength(), a))
             .forEachOrdered(System.err::println);
     System.err.println();
     System.err.println("  sink-operands:");
-    CommandaSinks.sinks.stream()
-            .map(Commanda::argUsage)
+    args.getSinks().stream()
+            .map(a -> argUsage(args.getSinks().maxArgLength(), a))
             .forEachOrdered(System.err::println);
     System.exit(1);
-  }
-
-  private TypeReference nextInputType(LinkedList<String> argList) {
-    if (argList.isEmpty()) {
-      if (sink == null) {
-        return LambdaUtil.STRING_TYPE;
-      }
-      else {
-        return sink.getInputType();
-      }
-    }
-    else {
-      String mapArg = argList.getFirst();
-      if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
-        throw new RuntimeException("Cannot have more than one adjacent lambda expression (-e, -ne, or -me)");
-      }
-      else {
-        Optional<CommandaMap<?, ?>> map = CommandaMaps.forArg(mapArg);
-        if (map.isPresent()) {
-          return map.get().getInputType();
-        }
-        else {
-          throw new RuntimeException("Unknown map argument: " + mapArg);
-        }
-      }
-    }
-  }
-
-  private CommandaMap popNextMap(TypeReference inputType, LinkedList<String> argList) {
-    String mapArg = argList.pop();
-    if ("-e".equals(mapArg) || "-ne".equals(mapArg) || "-me".equals(mapArg)) {
-      if (argList.isEmpty()) {
-        throw new RuntimeException("Missing lambda code argument to: " + mapArg);
-      }
-      String codeArg = argList.pop();
-      if (codeArg.startsWith("-")) {
-        throw new RuntimeException("Missing lambda code argument to: " + mapArg);
-      }
-      if ("-e".equals(mapArg)) {
-        return new LambdaStreamMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
-      }
-      else if ("-ne".equals(mapArg)) {
-        return new LambdaElementMap(imports, staticImports, codeArg, inputType, nextInputType(argList));
-      }
-      else {
-        return new LambdaModifier(imports, staticImports, codeArg, inputType);
-      }
-    }
-    else {
-      Optional<CommandaMap<?, ?>> map = CommandaMaps.forArg(mapArg);
-      if (map.isPresent()) {
-        if (!map.get().getInputType().toString().equals(inputType.toString())) {
-          throw new RuntimeException("Input for argument: " + mapArg +
-                  " does not match output type for previous argument: " + inputType.toString());
-        }
-        return map.get();
-      }
-      else {
-        throw new RuntimeException("Unknown map argument: " + mapArg);
-      }
-    }
   }
 
   /**
    * @param args the arguments as passed in from the command-line
    */
   public static void main(String[] args) {
+    CommandaArgs availableArgs = DefaultCommandaArgs.defaultArgs();
     if (Arrays.asList(args).contains("--help")) {
-      usageExit();
+      usageExit(availableArgs);
     }
     try {
-      Commanda commanda = new Commanda(args);
+      Commanda commanda = new Commanda(
+              DefaultLambdaImports.imports,
+              DefaultLambdaImports.staticImports,
+              availableArgs,
+              args);
       commanda.run(System.in, System.out::println, System.out);
     }
     catch (Throwable t) {
       t.printStackTrace();
-      usageExit();
+      usageExit(availableArgs);
     }
   }
 }

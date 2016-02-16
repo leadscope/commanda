@@ -219,4 +219,42 @@ public class CommandaIntegrationTest {
       Assert.assertTrue("Should have mentioned type issue in error message", re.getMessage().contains("Type mismatch: cannot convert"));
     }
   }
+
+  @Test
+  public void testCheckMultipleSources() throws Throwable {
+    try {
+      new Commanda(
+              "-csv", testDir + "test3.txt",
+              "-tox", testDir + "test.toxml",
+              "-ne", "r -> r",
+              "-toxOut");
+      Assert.fail("Should have thrown exception with multiple sources");
+    }
+    catch (RuntimeException re) {
+      boolean containsMessage = re.getMessage().contains("More than one source");
+      if (!containsMessage) {
+        re.printStackTrace();
+      }
+      Assert.assertTrue("Should have mentioned sources in error message", containsMessage);
+    }
+  }
+
+  @Test
+  public void testCheckMultipleSinks() throws Throwable {
+    try {
+      new Commanda(
+              "-csv", testDir + "test3.txt",
+              "-toxOut",
+              "-ne", "r -> r",
+              "-toxOut");
+      Assert.fail("Should have thrown exception with multiple sources");
+    }
+    catch (RuntimeException re) {
+      boolean containsMessage = re.getMessage().contains("More than one sink");
+      if (!containsMessage) {
+        re.printStackTrace();
+      }
+      Assert.assertTrue("Should have mentioned sinks in error message", containsMessage);
+    }
+  }
 }

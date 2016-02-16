@@ -4,6 +4,7 @@
  */
 package com.leadscope.commanda.maps;
 
+import com.leadscope.commanda.CommandaArg;
 import pl.joegreen.lambdaFromString.TypeReference;
 
 /**
@@ -11,7 +12,7 @@ import pl.joegreen.lambdaFromString.TypeReference;
  * @param <T> the input element type
  * @param <R> the output element type
  */
-public interface CommandaMap<T, R> {
+public interface CommandaMap<T, R> extends CommandaArg {
   /**
    * @return a reference to the input type
    */
@@ -21,17 +22,4 @@ public interface CommandaMap<T, R> {
    * @return a reference to the output type
    */
   TypeReference<R> getOutputType();
-
-  /**
-   * Gets the name used on the command line, not including the hyphen. E.g. returning
-   * "csv" would be used on the command line as -csv
-   * @return the arg name
-   */
-  String getArgName();
-
-  /**
-   * Gets a brief description displayed in the usage message
-   * @return a brief description
-   */
-  String getDescription();
 }
