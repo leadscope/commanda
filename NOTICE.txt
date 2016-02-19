@@ -1,0 +1,40 @@
+Commanda - command-line lambdas for Java
+Copyright 2016 Leadscope, Inc.
+
+Licensing provided via the standard Apache License - see LICENSE.txt
+
+This product includes binary versions of other licensed software:
+
+-------
+Lambda From String Copyright (c) 2015 Paweł Chorążyk
+
+Licensed with the MIT License - see LICENSE-lambda_for_string.txt
+-------
+
+-------
+ToxML-API Copyright 2011-2016 Leadscope, Inc.
+
+Licensed with the standard Apache License - see LICENSE.txt
+-------
+
+-------
+JUnit Copyright 2002-2016 JUnit
+      All Rights Reserved.
+
+Licensed with Eclipse Public License - see LICENSE-junit.txt
+-------
+
+-------
+Apache Commons CSV
+Copyright 2005-2015 The Apache Software Foundation
+
+License with the standard Apache License - see LICENSE.txt
+-------
+
+-------
+XPP3 - Copyright (c) 2002 Extreme! Lab, Indiana University. All rights reserved.
+
+Licensed with Indiana University Extreme! Lab Software License - see LICENSE-xpp3.txt
+-------
+
+

@@ -7,6 +7,29 @@
   <groupId>leadscope.com</groupId>
   <artifactId>commanda</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <name>Commanda</name>
+  <description>Command-line lambdas for Java</description>
+
+  <developers>
+    <developer>
+      <name>Scott Miller</name>
+      <organization>Leadscope, Inc.</organization>
+      <organizationUrl>http://www.leadscope.com</organizationUrl>
+      <url>https://github.com/leadscope</url>
+    </developer>
+  </developers>
+  <organization>
+    <name>Leadscope, Inc.</name>
+    <url>http://www.leadscope.com</url>
+  </organization>
+  <inceptionYear>2016</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
