@@ -1,7 +1,8 @@
 Commanda - Command-line Lambdas For Java
 ========================================
 
-Create one-line command-line operations with Java 8's new lambdas. Setup chains of
+Create command-line operations with Java 8's lambdas. Similar to processing
+line records with awk, perl, or ruby - but instead, setup chains of
 transformations for your own Java types, all statically typed and compiled.
 
 
