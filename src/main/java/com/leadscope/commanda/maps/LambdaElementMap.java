@@ -56,7 +56,7 @@ public class LambdaElementMap implements CommandaElementMap {
 
       LambdaFactory factory = LambdaFactory.get(config);
 
-      lambda = (Function)factory.createLambda(lambdaString, new DynamicTypeReference(getTypeString()));
+      lambda = (Function)factory.createLambda(lambdaString, getTypeReference());
     }
     catch (RuntimeException re) {
       throw re;
@@ -91,9 +91,9 @@ public class LambdaElementMap implements CommandaElementMap {
     return lambda;
   }
 
-  private String getTypeString() {
-    return Function.class.getCanonicalName() + "<" +
+  private DynamicTypeReference getTypeReference() {
+    return new DynamicTypeReference(Function.class.getCanonicalName() + "<" +
             inputType.toString() + ", " +
-            outputType.toString() + ">";
+            outputType.toString() + ">");
   }
 }

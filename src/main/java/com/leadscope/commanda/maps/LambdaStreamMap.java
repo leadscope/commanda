@@ -56,7 +56,7 @@ public class LambdaStreamMap implements CommandaStreamMap {
 
       LambdaFactory factory = LambdaFactory.get(config);
 
-      lambda = (Function)factory.createLambda(lambdaString, new DynamicTypeReference(getTypeString()));
+      lambda = (Function)factory.createLambda(lambdaString, getTypeReference());
     }
     catch (RuntimeException re) {
       throw re;
@@ -91,9 +91,9 @@ public class LambdaStreamMap implements CommandaStreamMap {
     return lambda;
   }
 
-  private String getTypeString() {
-    return Function.class.getCanonicalName() +"<" +
+  private DynamicTypeReference getTypeReference() {
+    return new DynamicTypeReference(Function.class.getCanonicalName() +"<" +
             Stream.class.getCanonicalName() + "<" + inputType.toString() + ">, " +
-            Stream.class.getCanonicalName() + "<" + outputType.toString() + ">>";
+            Stream.class.getCanonicalName() + "<" + outputType.toString() + ">>");
   }
 }
