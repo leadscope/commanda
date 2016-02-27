@@ -16,7 +16,8 @@
  */
 package com.leadscope.commanda.maps;
 
-import com.leadscope.commanda.lambda.DynamicLambdaFactory;
+import pl.joegreen.lambdaFromString.DynamicTypeReference;
+import pl.joegreen.lambdaFromString.LambdaFactory;
 import pl.joegreen.lambdaFromString.LambdaFactoryConfiguration;
 import pl.joegreen.lambdaFromString.TypeReference;
 
@@ -53,9 +54,9 @@ public class LambdaStreamMap implements CommandaStreamMap {
               .withImports(imports.toArray(new Class[0]))
               .withStaticImports(staticImports.toArray(new String[0]));
 
-      DynamicLambdaFactory factory = DynamicLambdaFactory.get(config);
+      LambdaFactory factory = LambdaFactory.get(config);
 
-      lambda = (Function)factory.createLambda(lambdaString, getTypeString());
+      lambda = (Function)factory.createLambda(lambdaString, new DynamicTypeReference(getTypeString()));
     }
     catch (RuntimeException re) {
       throw re;
