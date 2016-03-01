@@ -12,8 +12,6 @@ To create the executable jar:
 
     mvn install
 
-The jar file will be at: target/commanda-<version>-jar-with-dependencies.jar
-
 Optionally create an alias:
 
     alias cmda='java -jar <project-path>/target/commanda-<version>-jar-with-dependencies.jar'
