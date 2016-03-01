@@ -16,7 +16,7 @@ The jar file will be at: target/commanda-<version>-jar-with-dependencies.jar
 
 Optionally create an alias:
 
-  alias cmda='java -jar e:/juno/commanda/target/commanda-<version>-jar-with-dependencies.jar'
+  alias cmda='java -jar <project-path>/target/commanda-<version>-jar-with-dependencies.jar'
 
 
 Simple Examples
@@ -27,7 +27,7 @@ Extract the fourth column from a CSV file:
 
 Extract the ids from ToxML records:
 
-  cmda -tox rtecs-50.xml -ne 'cr -> cr.getIds().stream().map(id -> id.toString()).collect(joining(", "))'
+  cmda -tox rtecs-50.xml -ne 'cr -> cr.getIds().map(id -> id.toString()).collect(joining(", "))'
 
 
 Extend Commanda
